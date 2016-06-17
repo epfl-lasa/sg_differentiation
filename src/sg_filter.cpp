@@ -44,12 +44,20 @@ Eigen::VectorXf ScalarSavitzkyGolayFilter::FitCoeffs()
   // an Eigen vector "face" of the data_buffer
   Eigen::Map<Eigen::VectorXf> data_buffer_eigen(data_buffer_,winlen_);
   // least square fit the coeffecients
-  Eigen::VectorXf coeffs = A_.fullPivHouseholderQr().solve(data_buffer_eigen);
+  Eigen::VectorXf coeffs = A_.colPivHouseholderQr().solve(data_buffer_eigen);
   return coeffs;
 }
 
-float ScalarSavitzkyGolayFilter::GetOutput(float query_val, int diff_order)
+float ScalarSavitzkyGolayFilter::GetOutput(float forward_param, int diff_order)
 {
+  // make sure forward_param is in the allowed range
+  forward_param = forward_param < 0.0 ? 0.0 : forward_param;
+  forward_param = forward_param > 1.0 ? 1.0 : forward_param;
+
+  // forward_param = 1 
+  float query_val = 0.0 + float(winlen_)/2.0*forward_param;
+  
+
   Eigen::VectorXf coeffs = FitCoeffs();
   coeffs = diff_poly_coeffs(coeffs, diff_order);
   Eigen::VectorXf query_vec(coeffs.size());
@@ -64,6 +72,11 @@ float ScalarSavitzkyGolayFilter::GetOutput(float query_val, int diff_order)
   return result;
 }
 
+float ScalarSavitzkyGolayFilter::GetOutput(int diff_order)
+{
+  return GetOutput(0.0, diff_order);
+}
+
 bool ScalarSavitzkyGolayFilter::IsInitialized()
 {
     if(n_added_ >= winlen_)
@@ -71,3 +84,29 @@ bool ScalarSavitzkyGolayFilter::IsInitialized()
     else
         return false;
 }
+
+
+SavitzkyGolayFilter::SavitzkyGolayFilter(int dim, int order, int winlen, float sample_time): dim_(dim){
+  for(int i = 0; i<dim; i++){
+    scalar_filters_.push_back(ScalarSavitzkyGolayFilter(order,winlen,sample_time));
+  }
+}
+
+void SavitzkyGolayFilter::AddData(Eigen::VectorXf inp){
+  for(int i=0; i<dim_; i++)
+    scalar_filters_[i].AddData(inp(i));
+}
+
+Eigen::VectorXf SavitzkyGolayFilter::GetOutput(int diff_order){
+  Eigen::VectorXf ret(dim_);
+  for(int i=0; i<dim_; i++)
+    ret(i) = scalar_filters_[i].GetOutput(diff_order);
+}
+
+Eigen::VectorXf SavitzkyGolayFilter::GetOutput(float forward_param, int diff_order){
+  Eigen::VectorXf ret(dim_);
+  for(int i=0; i<dim_; i++)
+    ret(i) = scalar_filters_[i].GetOutput(forward_param, diff_order);
+}
+
+
