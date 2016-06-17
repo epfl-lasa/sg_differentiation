@@ -1,3 +1,5 @@
+#ifndef SG_FILTER_H
+#define SG_FILTER_H
 
 #include <boost/circular_buffer.hpp>
 #include <eigen3/Eigen/Dense>
@@ -189,3 +191,5 @@ public:
   
 };
 
+
+#endif //SG_FILTER_H
