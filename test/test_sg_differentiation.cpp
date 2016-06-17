@@ -14,7 +14,8 @@ void debug_info(t p){
   std::cout<<p<<std::endl;
 }
 
-void load_matrix(const char *fname, Eigen::MatrixXf &target) {
+template<typename T>
+void load_matrix(const char *fname, T &target) {
 
   std::ifstream myfile(fname);
   ASSERT_TRUE(myfile);
@@ -84,7 +85,7 @@ TEST(CoefficientDifferentiatorTest, CorrectDifferentiationTest){
 
 TEST(AddDataTest,test){
   int winlen = 3;
-  ScalarSavitzkyGolayFilter filter(2,3);
+  ScalarSavitzkyGolayFilter filter(2,3,1);
   Eigen::VectorXf test_add(9);
   test_add << 1,2,3,4,5,6,7,8,9;
 
@@ -104,11 +105,84 @@ TEST(AddDataTest,test){
 }
 
 TEST(ConstructorTest, 5_51){
-  ScalarSavitzkyGolayFilter filter(5,51);
+  ScalarSavitzkyGolayFilter filter(5,51,1);
   Eigen::MatrixXf A;
   load_matrix("5_51_matrix.txt",A);
   assert_matrix_equal(A, filter.GetPolynomialMatrix(),COMP_THRESHOLD);
 }
+
+
+TEST(CorrectnessTest, TestData1){
+  int order = 3;
+  int winlen = 11;
+  float sample_time = 1e-3;
+  ScalarSavitzkyGolayFilter filter(order,winlen,sample_time);
+  Eigen::VectorXf inp, outp, outp_d, outp_dd;
+
+  load_matrix("test_data_1_inp.txt", inp);
+  load_matrix("test_data_1_outp.txt", outp);
+  load_matrix("test_data_1_outp_d.txt", outp_d);
+  load_matrix("test_data_1_outp_dd.txt", outp_dd);
+
+  Eigen::VectorXf outp_gen(inp.size());
+  Eigen::VectorXf outp_d_gen(inp.size());
+  Eigen::VectorXf outp_dd_gen(inp.size());
+
+  int test_size = inp.size();
+  
+  for(int i=0;i<test_size;i++){
+    filter.AddData(inp(i));
+    outp_gen(i) = filter.GetOutput(0, 0);
+    outp_d_gen(i) = filter.GetOutput(0, 1);
+    outp_dd_gen(i) = filter.GetOutput(0, 2);
+
+  }
+  // dont care about testing when the filter is not initialized, i.e. skip the first winlen samples
+  assert_vector_equal(outp.tail(test_size-winlen), outp_gen.tail(test_size-winlen), COMP_THRESHOLD);
+  assert_vector_equal(outp_d.tail(test_size-winlen), outp_d_gen.tail(test_size-winlen), 0.02);
+  //  debug_info(outp_d.tail(test_size-winlen) - outp_d_gen.tail(test_size-winlen));
+  //  debug_info(outp_dd.tail(test_size-winlen) - outp_dd_gen.tail(test_size-winlen));
+
+  // the accuracy is not as bad as it seems, about 0.5 % relative error here
+  assert_vector_equal(outp_dd.tail(test_size-winlen), outp_dd_gen.tail(test_size-winlen), 0.5);
+  
+}
+TEST(CorrectnessTest, TestData2){
+  int order = 2;
+  int winlen = 19;
+  float sample_time = 1e-3;
+  ScalarSavitzkyGolayFilter filter(order,winlen,sample_time);
+  Eigen::VectorXf inp, outp, outp_d, outp_dd;
+
+  load_matrix("test_data_2_inp.txt", inp);
+  load_matrix("test_data_2_outp.txt", outp);
+  load_matrix("test_data_2_outp_d.txt", outp_d);
+  load_matrix("test_data_2_outp_dd.txt", outp_dd);
+
+  Eigen::VectorXf outp_gen(inp.size());
+  Eigen::VectorXf outp_d_gen(inp.size());
+  Eigen::VectorXf outp_dd_gen(inp.size());
+
+  int test_size = inp.size();
+  
+  for(int i=0;i<test_size;i++){
+    filter.AddData(inp(i));
+    outp_gen(i) = filter.GetOutput(0, 0);
+    outp_d_gen(i) = filter.GetOutput(0, 1);
+    outp_dd_gen(i) = filter.GetOutput(0, 2);
+
+  }
+  // dont care about testing when the filter is not initialized, i.e. skip the first winlen samples
+  assert_vector_equal(outp.tail(test_size-winlen), outp_gen.tail(test_size-winlen), 1e-4);
+  assert_vector_equal(outp_d.tail(test_size-winlen), outp_d_gen.tail(test_size-winlen), 0.02);
+  //  debug_info(outp_d.tail(test_size-winlen) - outp_d_gen.tail(test_size-winlen));
+  //  debug_info(outp_dd.tail(test_size-winlen) - outp_dd_gen.tail(test_size-winlen));
+
+  // the accuracy is not as bad as it seems, about 0.5 % relative error here
+  assert_vector_equal(outp_dd.tail(test_size-winlen), outp_dd_gen.tail(test_size-winlen), 0.5);
+  
+}
+
 
 int main(int argc, char *argv[]){
   testing::InitGoogleTest(&argc, argv);

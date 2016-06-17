@@ -9,17 +9,19 @@ private:
   int order_;
   float * data_buffer_;
   int n_added_;
+  float sample_time_;
 
   Eigen::MatrixXf A_;
 
 
-  void FitCoeffs();
-  float GetOutput(float,int);
+  Eigen::VectorXf FitCoeffs();
+
 
 public:
-  ScalarSavitzkyGolayFilter(int order,int winlen);
+  ScalarSavitzkyGolayFilter(int order,int winlen, float sample_time);
+  float GetOutput(float,int);
   void AddData(float new_data);
-  Eigen::VectorXf filter(Eigen::VectorXf input, int n_differentiations);
+  float filter(float input, int n_differentiations);
   bool IsInitialized();
   Eigen::MatrixXf GetPolynomialMatrix(){
     return A_;
