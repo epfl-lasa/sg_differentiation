@@ -129,12 +129,15 @@ TEST(CorrectnessTest, TestData1){
   Eigen::VectorXf outp_dd_gen(inp.size());
 
   int test_size = inp.size();
-  
+  float tmp;
   for(int i=0;i<test_size;i++){
     filter.AddData(inp(i));
-    outp_gen(i) = filter.GetOutput(0, 0);
-    outp_d_gen(i) = filter.GetOutput(0, 1);
-    outp_dd_gen(i) = filter.GetOutput(0, 2);
+    filter.GetOutput(0, 0, tmp);
+    outp_gen(i) = tmp;
+    filter.GetOutput(0, 1, tmp);
+    outp_d_gen(i) = tmp;
+    filter.GetOutput(0, 2, tmp);
+    outp_dd_gen(i) = tmp;
 
   }
   // dont care about testing when the filter is not initialized, i.e. skip the first winlen samples
@@ -164,14 +167,18 @@ TEST(CorrectnessTest, TestData2){
   Eigen::VectorXf outp_dd_gen(inp.size());
 
   int test_size = inp.size();
-  
+  float tmp;
   for(int i=0;i<test_size;i++){
     filter.AddData(inp(i));
-    outp_gen(i) = filter.GetOutput(0, 0);
-    outp_d_gen(i) = filter.GetOutput(0, 1);
-    outp_dd_gen(i) = filter.GetOutput(0, 2);
+    filter.GetOutput(0, 0, tmp);
+    outp_gen(i) = tmp;
+    filter.GetOutput(0, 1, tmp);
+    outp_d_gen(i) = tmp;
+    filter.GetOutput(0, 2, tmp);
+    outp_dd_gen(i) = tmp;
 
   }
+
   // dont care about testing when the filter is not initialized, i.e. skip the first winlen samples
   assert_vector_equal(outp.tail(test_size-winlen), outp_gen.tail(test_size-winlen), 1e-4);
   assert_vector_equal(outp_d.tail(test_size-winlen), outp_d_gen.tail(test_size-winlen), 0.02);
@@ -182,6 +189,85 @@ TEST(CorrectnessTest, TestData2){
   assert_vector_equal(outp_dd.tail(test_size-winlen), outp_dd_gen.tail(test_size-winlen), 0.5);
   
 }
+
+
+TEST(MultiDimTes, DimensionTest){
+  int order = 4;
+  int winlen = 19;
+  float sample_time = 1e-3;
+  int dim = 2;
+  SavitzkyGolayFilter filter(dim,order,winlen,1e-3);
+  Eigen::VectorXf inp(dim);
+  Eigen::VectorXf outp;
+  filter.Filter(inp,0,outp);
+  ASSERT_EQ(outp.size(), dim);
+}
+
+TEST(MultiDimTes, AddDataReturnCodes){
+  int order = 4;
+  int winlen = 19;
+  float sample_time = 1e-3;
+  int dim = 2;
+  SavitzkyGolayFilter filter(dim,order,winlen,1e-3);
+  Eigen::VectorXf inp(dim+1);
+  ASSERT_EQ(filter.AddData(inp), -2);
+  inp.resize(dim);
+  ASSERT_EQ(filter.AddData(inp), 0);
+}
+
+TEST(MultiDimTest, CorrectnessTest){
+  int order = 4;
+  int winlen = 19;
+  float sample_time = 1e-3;
+  int dim = 2;
+  SavitzkyGolayFilter filter(dim,order,winlen,1e-3);
+  Eigen::VectorXf inp1, outp1, outp_d1, outp_dd1;
+  Eigen::VectorXf inp2, outp2, outp_d2, outp_dd2;
+
+
+  load_matrix("test_data_2_inp.txt", inp1);
+  int test_size = inp1.size();
+  load_matrix("test_data_2_outp.txt", outp1);
+  load_matrix("test_data_2_outp_d.txt", outp_d1);
+  load_matrix("test_data_2_outp_dd.txt", outp_dd1);
+  load_matrix("test_data_3_inp.txt", inp2);
+  load_matrix("test_data_3_outp.txt", outp2);
+  load_matrix("test_data_3_outp_d.txt", outp_d2);
+  load_matrix("test_data_3_outp_dd.txt", outp_dd2);
+
+  Eigen::VectorXf outp_gen1(test_size);
+  Eigen::VectorXf outp_d_gen1(test_size);
+  Eigen::VectorXf outp_dd_gen1(test_size);
+  Eigen::VectorXf outp_gen2(test_size);
+  Eigen::VectorXf outp_d_gen2(test_size);
+  Eigen::VectorXf outp_dd_gen2(test_size);
+
+  Eigen::VectorXf tmp(dim);
+  for(int i=0; i<test_size; i++){
+    tmp << inp1(i), inp2(i);
+    filter.AddData(tmp);
+    filter.GetOutput(0, tmp);
+    outp_gen1(i) = tmp(0);
+    outp_gen2(i) = tmp(1);
+    filter.GetOutput(1, tmp);
+    outp_d_gen1(i) = tmp(0);
+    outp_d_gen2(i) = tmp(1);
+    filter.GetOutput(2, tmp);
+    outp_dd_gen1(i) = tmp(0);
+    outp_dd_gen2(i) = tmp(1);
+  }
+  
+  assert_vector_equal(outp1.tail(test_size-winlen), outp_gen1.tail(test_size-winlen), 1e-4);
+  assert_vector_equal(outp_d1.tail(test_size-winlen), outp_d_gen1.tail(test_size-winlen), 0.02);
+  assert_vector_equal(outp_dd1.tail(test_size-winlen), outp_dd_gen1.tail(test_size-winlen), 0.5);
+
+  assert_vector_equal(outp2.tail(test_size-winlen), outp_gen2.tail(test_size-winlen), 1e-4);
+  assert_vector_equal(outp_d2.tail(test_size-winlen), outp_d_gen2.tail(test_size-winlen), 0.04);
+  assert_vector_equal(outp_dd2.tail(test_size-winlen), outp_dd_gen2.tail(test_size-winlen), 0.5);
+
+}
+
+
 
 
 int main(int argc, char *argv[]){

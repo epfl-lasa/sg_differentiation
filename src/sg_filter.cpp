@@ -16,13 +16,13 @@ ScalarSavitzkyGolayFilter::ScalarSavitzkyGolayFilter(int order,int winlen, float
     }
 }
 
-float ScalarSavitzkyGolayFilter::filter(float input, int diff_order)
+int ScalarSavitzkyGolayFilter::Filter(float input, int diff_order, float & output)
 {
   AddData(input);
-  return GetOutput(0, diff_order);
+  return GetOutput(0, diff_order, output);
 }
 
-void ScalarSavitzkyGolayFilter::AddData(float new_data)
+int ScalarSavitzkyGolayFilter::AddData(float new_data)
 {
   // fill the buffer with the first data point, better than nothing
   if(n_added_ == 0){
@@ -37,6 +37,7 @@ void ScalarSavitzkyGolayFilter::AddData(float new_data)
     // data_buffer_[0] = new_data;
   }
   n_added_++;
+  return 0;
 }
 
 Eigen::VectorXf ScalarSavitzkyGolayFilter::FitCoeffs()
@@ -48,8 +49,10 @@ Eigen::VectorXf ScalarSavitzkyGolayFilter::FitCoeffs()
   return coeffs;
 }
 
-float ScalarSavitzkyGolayFilter::GetOutput(float forward_param, int diff_order)
+int ScalarSavitzkyGolayFilter::GetOutput(float forward_param, int diff_order, float & result)
 {
+  if(n_added_ == 0)
+    return -3;
   // make sure forward_param is in the allowed range
   forward_param = forward_param < 0.0 ? 0.0 : forward_param;
   forward_param = forward_param > 1.0 ? 1.0 : forward_param;
@@ -63,18 +66,21 @@ float ScalarSavitzkyGolayFilter::GetOutput(float forward_param, int diff_order)
   Eigen::VectorXf query_vec(coeffs.size());
   for(int i=0;i<query_vec.size();i++)
     query_vec(i) = pow(query_val,i);
-  float result = coeffs.dot(query_vec);
+  result = coeffs.dot(query_vec);
   if(diff_order>0){
     result *= 1/pow(sample_time_, diff_order);
   }
   // if(diff_order % 2)
   //   result *= -1.0;
-  return result;
+  if(IsInitialized())
+    return 0;
+  else
+    return -1;
 }
 
-float ScalarSavitzkyGolayFilter::GetOutput(int diff_order)
+int ScalarSavitzkyGolayFilter::GetOutput(int diff_order, float & result)
 {
-  return GetOutput(0.0, diff_order);
+  return GetOutput(0.0, diff_order, result);
 }
 
 bool ScalarSavitzkyGolayFilter::IsInitialized()
@@ -92,21 +98,44 @@ SavitzkyGolayFilter::SavitzkyGolayFilter(int dim, int order, int winlen, float s
   }
 }
 
-void SavitzkyGolayFilter::AddData(Eigen::VectorXf inp){
-  for(int i=0; i<dim_; i++)
-    scalar_filters_[i].AddData(inp(i));
+int SavitzkyGolayFilter::AddData(const Eigen::VectorXf& inp){
+  if(inp.size() == dim_){
+    for(int i=0; i<dim_; i++)
+      scalar_filters_[i].AddData(inp(i));
+    return 0;
+  }
+  else
+    return -2;
 }
 
-Eigen::VectorXf SavitzkyGolayFilter::GetOutput(int diff_order){
-  Eigen::VectorXf ret(dim_);
-  for(int i=0; i<dim_; i++)
-    ret(i) = scalar_filters_[i].GetOutput(diff_order);
+int SavitzkyGolayFilter::GetOutput(int diff_order, Eigen::VectorXf & result){
+  return GetOutput(0.0, diff_order, result);
 }
 
-Eigen::VectorXf SavitzkyGolayFilter::GetOutput(float forward_param, int diff_order){
-  Eigen::VectorXf ret(dim_);
-  for(int i=0; i<dim_; i++)
-    ret(i) = scalar_filters_[i].GetOutput(forward_param, diff_order);
+int SavitzkyGolayFilter::GetOutput(float forward_param, int diff_order, Eigen::VectorXf & result){
+  result.resize(dim_);
+  float tmp;
+  for(int i=0; i<dim_; i++){
+    scalar_filters_[i].GetOutput(forward_param, diff_order, tmp);
+    result(i) = tmp;
+  }
+  if(IsInitialized())
+    return 0;
+  else
+    return -1;
+}
+
+bool SavitzkyGolayFilter::IsInitialized(){
+  return scalar_filters_[0].IsInitialized();
 }
 
 
+int SavitzkyGolayFilter::Filter(const Eigen::VectorXf& input, int diff_order, Eigen::VectorXf& output)
+{
+  int ret;
+  ret = AddData(input);
+  if (ret != 0)
+    return ret;
+  else
+    return GetOutput(0, diff_order, output);
+}
