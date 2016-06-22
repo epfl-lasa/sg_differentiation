@@ -22,13 +22,13 @@ int main(int argc, char* argv[]){
   // for scalar data:
   int order = 2;
   int winlen = 11;
-  float sample_time = 1e-3;
-  ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
+  SGF::real sample_time = 1e-3; // this is simply a float or double, you can change it in the header sg_filter.h if yo u want
+  SGF::ScalarSavitzkyGolayFilter filter(order, winlen, sample_time);
   // add some data
-  float new_data = GetYourSensorData() //put your raw data
+  SGF::real new_data = GetYourSensorData() //put your raw data
   filter.AddData(new_data);
   // to get output:
-  float output;
+  SGF::real output;
   int ret_code;
   ret_code = filter.GetOutput(0, output); // the 0 means we dont want differntiation. Put 1 to differentiate once, etc
   // ret_code will be -1 until at least winlen data points have been added, then it will be 0
@@ -36,13 +36,13 @@ int main(int argc, char* argv[]){
   
   // multidim case
   int dim = 2;
-  SavitzkyGolayFilter filter(dim, order, winlen, sample_time);
-  Eigen::VectorXf inp(dim);
+  SGF::SavitzkyGolayFilter filter(dim, order, winlen, sample_time);
+  SGF::Vec inp(dim); // SGF::Vec is the same as Eigen::Matrix<SGF::real, Eigen::Dynamic, 1>
   inp = GetYourSensorData();
   ret_code = filter.AddData(inp);
   // ret_code will be -2 if you try tp add data of wrong size
   
-  Eigen::VectorXf outp(dim);
+  SGF::Vec outp(dim);
   ret_code = filter.GetOutput(0, outp);
   // ret_code will be -1 until at least winlen data points have been added, then it will be 0
    

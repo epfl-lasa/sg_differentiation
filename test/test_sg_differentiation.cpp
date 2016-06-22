@@ -9,6 +9,8 @@
 
 #define COMP_THRESHOLD 1e-6
 
+using namespace SGF;
+
 template<typename t>
 void debug_info(t p){
   std::cout<<p<<std::endl;
@@ -18,7 +20,7 @@ template<typename T>
 void load_matrix(const char *fname, T &target) {
 
   std::ifstream myfile(fname);
-  ASSERT_TRUE(myfile);
+  EXPECT_TRUE(myfile);
   std::string line;
   float f;
   int n_rows=0;
@@ -43,41 +45,41 @@ void load_matrix(const char *fname, T &target) {
 
 template <typename R>
 void assert_matrix_equal(const Eigen::Matrix<R,Eigen::Dynamic,Eigen::Dynamic>& m1, const Eigen::Matrix<R,Eigen::Dynamic,Eigen::Dynamic>& m2, double th){
-  ASSERT_EQ(m1.rows(),m2.rows());
-  ASSERT_EQ(m1.cols(),m2.cols());
+  EXPECT_EQ(m1.rows(),m2.rows());
+  EXPECT_EQ(m1.cols(),m2.cols());
   for (size_t row = 0; row < m1.rows(); ++row)
     {
       for (size_t col = 0; col < m1.cols(); ++col)
 	{
-	  ASSERT_NEAR(m1(row,col), m2(row,col),th);
+	  EXPECT_NEAR(m1(row,col), m2(row,col),th);
 	}
     }
 }
 template <typename T1,typename T2>
 void assert_vector_equal(const T1 & m1, const T2& m2, double th){
-  ASSERT_EQ(m1.rows(),m2.rows());
-  ASSERT_EQ(m1.cols(),m2.cols());
+  EXPECT_EQ(m1.rows(),m2.rows());
+  EXPECT_EQ(m1.cols(),m2.cols());
   for (size_t row = 0; row < m1.rows(); ++row)
     {
       for (size_t col = 0; col < m1.cols(); ++col)
 	{
-	  ASSERT_NEAR(m1(row,col), m2(row,col),th);
+	  EXPECT_NEAR(m1(row,col), m2(row,col),th);
 	}
     }
 }
 
 TEST(CoefficientDifferentiatorTest, CoeffVectorLengthTest){
-  Eigen::VectorXf b(4);
-  ASSERT_EQ(diff_poly_coeffs(b,1).size(),3);
-  ASSERT_EQ(diff_poly_coeffs(b,2).size(),2);
+  Vec b(4);
+  EXPECT_EQ(diff_poly_coeffs(b,1).size(),3);
+  EXPECT_EQ(diff_poly_coeffs(b,2).size(),2);
 }
 
 TEST(CoefficientDifferentiatorTest, CorrectDifferentiationTest){
-  Eigen::VectorXf a(6);
+  Vec a(6);
   a << 1,1,1,1,1,1;
-  Eigen::VectorXf b(5);
+  Vec b(5);
   b << 1,2,3,4,5;
-  Eigen::VectorXf c(4);
+  Vec c(4);
   c << 2,6,12,20;
   assert_vector_equal(diff_poly_coeffs(a,1), b, COMP_THRESHOLD);
   assert_vector_equal(diff_poly_coeffs(a,2), c, COMP_THRESHOLD);
@@ -86,16 +88,16 @@ TEST(CoefficientDifferentiatorTest, CorrectDifferentiationTest){
 TEST(AddDataTest,test){
   int winlen = 3;
   ScalarSavitzkyGolayFilter filter(2,3,1);
-  Eigen::VectorXf test_add(9);
+  Vec test_add(9);
   test_add << 1,2,3,4,5,6,7,8,9;
 
   for(int i=0;i<test_add.size();i++){
     filter.AddData(test_add[i]);
 
     if(i<winlen-1){
-      ASSERT_FALSE(filter.IsInitialized());
+      EXPECT_FALSE(filter.IsInitialized());
     }else{
-      ASSERT_TRUE(filter.IsInitialized());
+      EXPECT_TRUE(filter.IsInitialized());
     }
     if(filter.IsInitialized()){
       assert_vector_equal(filter.GetData(),test_add.segment(i-winlen+1,winlen), COMP_THRESHOLD);
@@ -106,7 +108,7 @@ TEST(AddDataTest,test){
 
 TEST(ConstructorTest, 5_51){
   ScalarSavitzkyGolayFilter filter(5,51,1);
-  Eigen::MatrixXf A;
+  Mat A;
   load_matrix("5_51_matrix.txt",A);
   assert_matrix_equal(A, filter.GetPolynomialMatrix(),COMP_THRESHOLD);
 }
@@ -117,16 +119,16 @@ TEST(CorrectnessTest, TestData1){
   int winlen = 11;
   float sample_time = 1e-3;
   ScalarSavitzkyGolayFilter filter(order,winlen,sample_time);
-  Eigen::VectorXf inp, outp, outp_d, outp_dd;
+  Vec inp, outp, outp_d, outp_dd;
 
   load_matrix("test_data_1_inp.txt", inp);
   load_matrix("test_data_1_outp.txt", outp);
   load_matrix("test_data_1_outp_d.txt", outp_d);
   load_matrix("test_data_1_outp_dd.txt", outp_dd);
 
-  Eigen::VectorXf outp_gen(inp.size());
-  Eigen::VectorXf outp_d_gen(inp.size());
-  Eigen::VectorXf outp_dd_gen(inp.size());
+  Vec outp_gen(inp.size());
+  Vec outp_d_gen(inp.size());
+  Vec outp_dd_gen(inp.size());
 
   int test_size = inp.size();
   float tmp;
@@ -155,16 +157,16 @@ TEST(CorrectnessTest, TestData2){
   int winlen = 19;
   float sample_time = 1e-3;
   ScalarSavitzkyGolayFilter filter(order,winlen,sample_time);
-  Eigen::VectorXf inp, outp, outp_d, outp_dd;
+  Vec inp, outp, outp_d, outp_dd;
 
   load_matrix("test_data_2_inp.txt", inp);
   load_matrix("test_data_2_outp.txt", outp);
   load_matrix("test_data_2_outp_d.txt", outp_d);
   load_matrix("test_data_2_outp_dd.txt", outp_dd);
 
-  Eigen::VectorXf outp_gen(inp.size());
-  Eigen::VectorXf outp_d_gen(inp.size());
-  Eigen::VectorXf outp_dd_gen(inp.size());
+  Vec outp_gen(inp.size());
+  Vec outp_d_gen(inp.size());
+  Vec outp_dd_gen(inp.size());
 
   int test_size = inp.size();
   float tmp;
@@ -197,10 +199,10 @@ TEST(MultiDimTes, DimensionTest){
   float sample_time = 1e-3;
   int dim = 2;
   SavitzkyGolayFilter filter(dim,order,winlen,1e-3);
-  Eigen::VectorXf inp(dim);
-  Eigen::VectorXf outp;
+  Vec inp(dim);
+  Vec outp;
   filter.Filter(inp,0,outp);
-  ASSERT_EQ(outp.size(), dim);
+  EXPECT_EQ(outp.size(), dim);
 }
 
 TEST(MultiDimTes, AddDataReturnCodes){
@@ -209,10 +211,10 @@ TEST(MultiDimTes, AddDataReturnCodes){
   float sample_time = 1e-3;
   int dim = 2;
   SavitzkyGolayFilter filter(dim,order,winlen,1e-3);
-  Eigen::VectorXf inp(dim+1);
-  ASSERT_EQ(filter.AddData(inp), -2);
+  Vec inp(dim+1);
+  EXPECT_EQ(filter.AddData(inp), -2);
   inp.resize(dim);
-  ASSERT_EQ(filter.AddData(inp), 0);
+  EXPECT_EQ(filter.AddData(inp), 0);
 }
 
 TEST(MultiDimTest, CorrectnessTest){
@@ -221,8 +223,8 @@ TEST(MultiDimTest, CorrectnessTest){
   float sample_time = 1e-3;
   int dim = 2;
   SavitzkyGolayFilter filter(dim,order,winlen,1e-3);
-  Eigen::VectorXf inp1, outp1, outp_d1, outp_dd1;
-  Eigen::VectorXf inp2, outp2, outp_d2, outp_dd2;
+  Vec inp1, outp1, outp_d1, outp_dd1;
+  Vec inp2, outp2, outp_d2, outp_dd2;
 
 
   load_matrix("test_data_2_inp.txt", inp1);
@@ -235,14 +237,14 @@ TEST(MultiDimTest, CorrectnessTest){
   load_matrix("test_data_3_outp_d.txt", outp_d2);
   load_matrix("test_data_3_outp_dd.txt", outp_dd2);
 
-  Eigen::VectorXf outp_gen1(test_size);
-  Eigen::VectorXf outp_d_gen1(test_size);
-  Eigen::VectorXf outp_dd_gen1(test_size);
-  Eigen::VectorXf outp_gen2(test_size);
-  Eigen::VectorXf outp_d_gen2(test_size);
-  Eigen::VectorXf outp_dd_gen2(test_size);
+  Vec outp_gen1(test_size);
+  Vec outp_d_gen1(test_size);
+  Vec outp_dd_gen1(test_size);
+  Vec outp_gen2(test_size);
+  Vec outp_d_gen2(test_size);
+  Vec outp_dd_gen2(test_size);
 
-  Eigen::VectorXf tmp(dim);
+  Vec tmp(dim);
   for(int i=0; i<test_size; i++){
     tmp << inp1(i), inp2(i);
     filter.AddData(tmp);
