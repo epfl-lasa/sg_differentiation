@@ -32,9 +32,13 @@ cd ./test
 ./sg_differentiation-test
 ```
 
-Once all tests are passed, it's safe to say that you can use this library in your own project, to include it, add the following lines to your CMakeLists.txt
+Once all tests are passed, it's safe to say that you can use this library in your own project, to include it, add the following lines to your CMakeLists.txt (assuming ```test-sg.cpp``` is where you want to use the library)
 ```
-find_package()..
+find_package (Eigen3 REQUIRED) 
+include_directories(include ${SG_DIFFERENTATION_INCLUDE_DIRS})
+
+add_executable(test-sg src/test-sg.cpp)
+target_link_libraries(test-sg sg_differentiation)
 ```
 
 ## Usage
