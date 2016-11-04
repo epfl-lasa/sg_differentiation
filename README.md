@@ -11,6 +11,32 @@ doxygen Doxyfile
 
 This will produce html files documenting the code. Open doc/html/index.html to browse them. 
 
+## Installation
+To install the library and build testing script, run the following commands:
+
+```c++
+$ mkdir build && cd build
+$ cmake ..
+$ make
+$ sudo make install
+```
+If you get the following problem:
+```c++
+Could NOT find GTest (missing: GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
+```
+follow the steps in this link [GTEST CMAKE FIX](http://stackoverflow.com/questions/24295876/cmake-cannot-find-a-googletest-required-library). 
+
+To test that everything is working accordingly, run the following commands:
+```c++
+cd ./test
+./sg_differentiation-test
+```
+
+Once all tests are passed, it's safe to say that you can use this library in your own project, to include it, add the following lines to your CMakeLists.txt
+```
+find_package()..
+```
+
 ## Usage
 A minimalist cpp program using the filter could look like:
 
