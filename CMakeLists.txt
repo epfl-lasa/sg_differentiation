@@ -5,19 +5,27 @@ project(sg_differentiation)
 set(EXECUTABLE_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/test)
 set(LIBRARY_OUTPUT_PATH     ${PROJECT_SOURCE_DIR}/lib )
 set(LIB_INSTALL_PATH        ${CMAKE_INSTALL_PREFIX}lib/) 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH       ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(INCLUDE_DIR             ${CMAKE_CURRENT_SOURCE_DIR}/include)    
+set(SRC_DIR                 ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+set(SGD_INC ${INCLUDE_DIR}/sg_filter.h)
 
 find_package (Eigen3 REQUIRED) 
-include_directories(include)
  
 FILE(GLOB SRC_FILES src/sg_filter.cpp)
 FILE(GLOB HEADER_FILES include/sg_filter.h)
 
+include_directories(include)
 
 add_library(${PROJECT_NAME} SHARED ${SRC_FILES} ${HEADER_FILES})
+target_link_libraries ( ${PROJECT_NAME} pthread)
+
+# INSTALL
+message(status "    CMAKE_INSTALL_PREFIX:" ${CMAKE_INSTALL_PREFIX})
 install(TARGETS ${PROJECT_NAME} DESTINATION lib EXPORT ${PROJECT_NAME}-targets)
 install(EXPORT ${PROJECT_NAME}-targets DESTINATION lib/${PROJECT_NAME})
-target_link_libraries ( ${PROJECT_NAME} pthread)
+install(FILES ${SGD_INC} DESTINATION include/)
 
 ###### GTEST STUFF ######
 enable_testing()
