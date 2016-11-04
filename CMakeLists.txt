@@ -38,25 +38,3 @@ target_link_libraries(${PROJECT_NAME}-test
 ${PROJECT_NAME} ${GTEST_BOTH_LIBRARIES} pthread)
 add_test(AllTestsInSG ${PROJECT_NAME}-test)
 
-####################### CATKIN STUFF ##################
-#find_package(catkin REQUIRED)
-#catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES sg_differentiation
-#)
-
-#include_directories(include)
-
-## Declare a C++ library
-# add_library(sg_differentiation
-#   src/sg_filter.cpp include/sg_filter.h
-# )
-
-## Add gtest based cpp test target and link libraries
-#catkin_add_gtest(${PROJECT_NAME}-test
-#  test/test_sg_differentiation.cpp
-#  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
-#if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-#endif()
-
