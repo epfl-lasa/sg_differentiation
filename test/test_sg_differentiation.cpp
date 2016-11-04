@@ -109,7 +109,7 @@ TEST(AddDataTest,test){
 TEST(ConstructorTest, 5_51){
   ScalarSavitzkyGolayFilter filter(5,51,1);
   Mat A;
-  load_matrix("5_51_matrix.txt",A);
+  load_matrix("./data/5_51_matrix.txt",A);
   assert_matrix_equal(A, filter.GetPolynomialMatrix(),COMP_THRESHOLD);
 }
 
@@ -121,10 +121,10 @@ TEST(CorrectnessTest, TestData1){
   ScalarSavitzkyGolayFilter filter(order,winlen,sample_time);
   Vec inp, outp, outp_d, outp_dd;
 
-  load_matrix("test_data_1_inp.txt", inp);
-  load_matrix("test_data_1_outp.txt", outp);
-  load_matrix("test_data_1_outp_d.txt", outp_d);
-  load_matrix("test_data_1_outp_dd.txt", outp_dd);
+  load_matrix("./data/test_data_1_inp.txt", inp);
+  load_matrix("./data/test_data_1_outp.txt", outp);
+  load_matrix("./data/test_data_1_outp_d.txt", outp_d);
+  load_matrix("./data/test_data_1_outp_dd.txt", outp_dd);
 
   Vec outp_gen(inp.size());
   Vec outp_d_gen(inp.size());
@@ -159,10 +159,10 @@ TEST(CorrectnessTest, TestData2){
   ScalarSavitzkyGolayFilter filter(order,winlen,sample_time);
   Vec inp, outp, outp_d, outp_dd;
 
-  load_matrix("test_data_2_inp.txt", inp);
-  load_matrix("test_data_2_outp.txt", outp);
-  load_matrix("test_data_2_outp_d.txt", outp_d);
-  load_matrix("test_data_2_outp_dd.txt", outp_dd);
+  load_matrix("./data/test_data_2_inp.txt", inp);
+  load_matrix("./data/test_data_2_outp.txt", outp);
+  load_matrix("./data/test_data_2_outp_d.txt", outp_d);
+  load_matrix("./data/test_data_2_outp_dd.txt", outp_dd);
 
   Vec outp_gen(inp.size());
   Vec outp_d_gen(inp.size());
@@ -227,15 +227,15 @@ TEST(MultiDimTest, CorrectnessTest){
   Vec inp2, outp2, outp_d2, outp_dd2;
 
 
-  load_matrix("test_data_2_inp.txt", inp1);
+  load_matrix("./data/test_data_2_inp.txt", inp1);
   int test_size = inp1.size();
-  load_matrix("test_data_2_outp.txt", outp1);
-  load_matrix("test_data_2_outp_d.txt", outp_d1);
-  load_matrix("test_data_2_outp_dd.txt", outp_dd1);
-  load_matrix("test_data_3_inp.txt", inp2);
-  load_matrix("test_data_3_outp.txt", outp2);
-  load_matrix("test_data_3_outp_d.txt", outp_d2);
-  load_matrix("test_data_3_outp_dd.txt", outp_dd2);
+  load_matrix("./data/test_data_2_outp.txt", outp1);
+  load_matrix("./data/test_data_2_outp_d.txt", outp_d1);
+  load_matrix("./data/test_data_2_outp_dd.txt", outp_dd1);
+  load_matrix("./data/test_data_3_inp.txt", inp2);
+  load_matrix("./data/test_data_3_outp.txt", outp2);
+  load_matrix("./data/test_data_3_outp_d.txt", outp_d2);
+  load_matrix("./data/test_data_3_outp_dd.txt", outp_dd2);
 
   Vec outp_gen1(test_size);
   Vec outp_d_gen1(test_size);
