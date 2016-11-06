@@ -3,6 +3,7 @@ project(sg_differentiation)
 
 ####################### CMAKE STUFF ##################
 set(EXECUTABLE_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/test)
+set(CMAKE_INSTALL_PREFIX    /usr/)
 set(LIBRARY_OUTPUT_PATH     ${PROJECT_SOURCE_DIR}/lib )
 set(LIB_INSTALL_PATH        ${CMAKE_INSTALL_PREFIX}lib/) 
 set(CMAKE_MODULE_PATH       ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
