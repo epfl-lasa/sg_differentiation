@@ -1,6 +1,8 @@
 # Savitzky-Golay smoothing and differentiation
 A package implementing Savitzky-Golay smoothing and differentiation. May be useful to estimate e.g. velocity and acceleration from position measurements.
 
+**NOTE:** For Non-ROS users checkout the -cmake branch.
+
 ## Documentation
 You can use doxygen to get some source code documentation which you may find useful when using the library. 
 
