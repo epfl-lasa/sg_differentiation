@@ -9,7 +9,7 @@ set(LIB_INSTALL_PATH        ${CMAKE_INSTALL_PREFIX}lib/)
 set(CMAKE_MODULE_PATH       ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(INCLUDE_DIR             ${CMAKE_CURRENT_SOURCE_DIR}/include)    
 set(SRC_DIR                 ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -O2 -O3 -Ofast")
+set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -O2 -O3")
 
 set(SGD_INC ${INCLUDE_DIR}/sg_filter.h)
 
