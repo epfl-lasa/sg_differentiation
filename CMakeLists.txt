@@ -9,11 +9,12 @@ set(LIB_INSTALL_PATH        ${CMAKE_INSTALL_PREFIX}lib/)
 set(CMAKE_MODULE_PATH       ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(INCLUDE_DIR             ${CMAKE_CURRENT_SOURCE_DIR}/include)    
 set(SRC_DIR                 ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -O2 -O3 -Ofast")
 
 set(SGD_INC ${INCLUDE_DIR}/sg_filter.h)
 
 find_package (Eigen3 REQUIRED) 
- 
+
 FILE(GLOB SRC_FILES src/sg_filter.cpp)
 FILE(GLOB HEADER_FILES include/sg_filter.h)
 
@@ -38,4 +39,12 @@ add_executable(${PROJECT_NAME}-test
 target_link_libraries(${PROJECT_NAME}-test 
 ${PROJECT_NAME} ${GTEST_BOTH_LIBRARIES} pthread)
 add_test(AllTestsInSG ${PROJECT_NAME}-test)
+
+###### Normal Test ######
+add_executable(multidim_test
+  test/multidim_test.cpp
+  ${WORKING_DIR} ${PROJECT_SOURCE_DIR}/test)
+target_link_libraries(multidim_test 
+${PROJECT_NAME} pthread)
+
 

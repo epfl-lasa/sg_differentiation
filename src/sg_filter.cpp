@@ -61,16 +61,20 @@ int ScalarSavitzkyGolayFilter::GetOutput(real forward_param, int diff_order, rea
   // forward_param = 1 
   real query_val = 0.0 + real(winlen_)/2.0*forward_param;
   
-
   Vec coeffs = FitCoeffs();
   coeffs = diff_poly_coeffs(coeffs, diff_order);
+
   Vec query_vec(coeffs.size());
   for(int i=0;i<query_vec.size();i++)
     query_vec(i) = pow(query_val,i);
+
+
+
   result = coeffs.dot(query_vec);
   if(diff_order>0){
     result *= 1/pow(sample_time_, diff_order);
   }
+
   // if(diff_order % 2)
   //   result *= -1.0;
   if(IsInitialized())
@@ -114,16 +118,20 @@ int SavitzkyGolayFilter::GetOutput(int diff_order, Vec & result){
 }
 
 int SavitzkyGolayFilter::GetOutput(real forward_param, int diff_order, Vec & result){
-  result.resize(dim_);
-  real tmp;
-  for(int i=0; i<dim_; i++){
-    scalar_filters_[i].GetOutput(forward_param, diff_order, tmp);
-    result(i) = tmp;
-  }
-  if(IsInitialized())
-    return 0;
-  else
-    return -1;
+
+
+        result.resize(dim_);
+        real tmp;
+        for(int i=0; i<dim_; i++){
+            scalar_filters_[i].GetOutput(forward_param, diff_order, tmp);
+            result(i) = tmp;
+        }
+
+        if(IsInitialized())
+            return 0;
+        else
+            return -1;
+
 }
 
 bool SavitzkyGolayFilter::IsInitialized(){
